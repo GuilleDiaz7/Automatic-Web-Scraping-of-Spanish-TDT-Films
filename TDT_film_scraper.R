@@ -8,14 +8,14 @@ library(lubridate)
 
 
 #### LOAD URL AND SCRAPE THE WEBSITE ####
-url <- "https://www.elmundo.es/television/programacion-tv/peliculas.html"
-html_data <- read_html(url)
+main_url <- "https://www.elmundo.es/television/programacion-tv/peliculas.html"
+html_data <- read_html(main_url)
 
-films <- html_data %>% 
+sp_title <- html_data %>% 
   html_nodes(".nombre-programa a") %>% 
   html_text2()
 
-times <- html_data %>% 
+time <- html_data %>% 
   html_nodes(".hora-categoria") %>% 
   html_text2()
 
@@ -27,7 +27,7 @@ description <- html_data %>%
   html_nodes(".sinopsis-programa") %>% 
   html_text2()
 
-dates <- html_data %>% 
+date <- html_data %>% 
   html_nodes("li.programa-canal") %>% 
   html_attr("name")
 
@@ -38,21 +38,67 @@ channel <- html_data %>%
 channel <- as.data.frame(channel)
 channel <- channel[seq_len(nrow(channel)) %% 2 == 0, ] 
 
+url <- html_data %>% 
+  html_nodes(xpath = '//a[@itemprop="url"]') %>%
+  html_attr("href")
+url <- url[1:length(sp_title)]
+
 
 #### CREATE THE FINAL DATAFRAME AND CLEAN IT ####
-df <- as.data.frame(cbind(dates, times, channel, films, genre, description))
+df <- as.data.frame(cbind(date, time, channel, sp_title, genre, url, description))
 
 df_clean <- df %>% 
-  filter(films != "Cine" & genre != "Cine") %>% 
-  mutate(dates = ymd(substr(dates, 1, 8)),
+  filter(sp_title != "Cine" & genre != "Cine") %>% 
+  mutate(date = ymd(substr(date, 1, 8)),
          ) %>%
-  filter(dates = Sys.Date() ) %>%
-  transmute(date_time = ymd_hm(paste(dates, times)),
+  filter(date = Sys.Date() ) %>%
+  transmute(date_time = ymd_hm(paste(date, time)),
             channel = channel,
-            films = films, 
+            sp_title = sp_title, 
             genre = genre,
             description = description
             )
+
+
+#### Perform the second part of the scraping ####
+nav_results_list <- tibble(
+  html_result = map(df_clean$url,
+                    ~ {
+                      Sys.sleep(2)
+                      .x %>% 
+                        read_html()
+                    }),
+  url = df_clean$url
+  )
+
+results_by_film_url <- tibble(url = nav_results_list$url,
+                          original_title = map(nav_results_list$html_result,
+                                               ~ .x %>%
+                                                 html_nodes("tr:nth-child(2) .ficha-txt-descripcion") %>%
+                                                 html_text2()
+                                               ),
+                          year = map(nav_results_list$html_result,
+                                     ~ .x %>%
+                                       html_nodes("tr:nth-child(4) .ficha-txt-descripcion") %>%
+                                       html_text2()
+                                     )
+                          )
+
+joined_tibble <- left_join(
+  df_clean, results_by_film_url, by = c("url" = "url")
+)
+
+df_clean <- joined_tibble %>% 
+  relocate(
+    year, .before = genre
+  ) %>% 
+  relocate(
+    original_title, .after = sp_title
+  ) %>% 
+  select(-url) %>% 
+  mutate(original_title = as.character(original_title),
+         year = as.numeric(year))
+
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_clean, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
