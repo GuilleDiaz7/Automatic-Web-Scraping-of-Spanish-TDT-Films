@@ -54,7 +54,7 @@ df_clean <- df %>%
             )
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
-write.table(df_clean, "pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+write.table(df_clean, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
 
 
   
