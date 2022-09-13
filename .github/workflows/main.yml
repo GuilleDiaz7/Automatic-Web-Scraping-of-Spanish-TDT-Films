@@ -4,8 +4,8 @@ name: spanishTDTscrape
 
 # Controls when the action will run.
 on:
-  schedule:
-    - cron:  '0 14 * * *'
+  push:
+    branches: main
 
 
 jobs: 
