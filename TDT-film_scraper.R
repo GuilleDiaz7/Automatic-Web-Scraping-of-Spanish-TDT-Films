@@ -58,7 +58,7 @@ df_clean <- df_clean %>%
   relocate(date_time, .before = channel)
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
-write.table(prueba, "pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, append = TRUE, col.names = FALSE)
+write.table(df_clean, "pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, append = TRUE, col.names = FALSE)
 
 ## Check if the appending works fine ##
 prueba <- read.csv("pelis_tv_hoy.csv", fileEncoding = "UTF-8")
