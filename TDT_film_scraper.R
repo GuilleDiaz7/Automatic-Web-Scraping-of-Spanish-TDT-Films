@@ -45,7 +45,8 @@ df <- as.data.frame(cbind(dates, times, channel, films, genre, description))
 df_clean <- df %>% 
   filter(films != "Cine" & genre != "Cine") %>% 
   mutate(dates = ymd(substr(dates, 1, 8)),
-         ) %>% 
+         ) %>%
+  filter(dates = Sys.Date() ) %>%
   transmute(date_time = ymd_hm(paste(dates, times)),
             channel = channel,
             films = films, 
