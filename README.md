@@ -6,3 +6,5 @@ The data comes from the following website: https://www.elmundo.es/television/pro
 It is updated every day and gives the film title, the film genre, a brief film synopsis, the TV channel and the day and time.
 
 In the workflows folder it is the .yaml file that calls GitHub to autoscrape the data, using a R Script.
+
+It may be some duplicated rows on the .csv file, or some rows where the only difference is the time. This happens because there are some changes on the timetables uploaded by the website.
