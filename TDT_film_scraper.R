@@ -56,6 +56,7 @@ df_clean <- df %>%
             channel = channel,
             sp_title = sp_title, 
             genre = genre,
+            url = url,
             description = description
             )
 
