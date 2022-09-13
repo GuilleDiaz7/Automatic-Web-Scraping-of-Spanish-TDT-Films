@@ -43,19 +43,15 @@ channel <- channel[seq_len(nrow(channel)) %% 2 == 0, ]
 df <- as.data.frame(cbind(dates, times, channel, films, genre, description))
 
 df_clean <- df %>% 
-  filter(films != "Cine" & genre != "Cine")
-
-df_clean$dates <- substr(df_clean$dates, 1,8)
-
-df_clean$dates <- df_clean$dates %>% 
-  ymd()
-
-df_clean$date_time = ymd_hm(paste(df_clean$dates, df_clean$times))
-df_clean <- df_clean %>% select(
-  -c(times, dates)
-)
-df_clean <- df_clean %>% 
-  relocate(date_time, .before = channel)
+  filter(films != "Cine" & genre != "Cine") %>% 
+  mutate(dates = ymd(substr(dates, 1, 8)),
+         ) %>% 
+  transmute(date_time = ymd_hm(paste(dates, times)),
+            channel = channel,
+            films = films, 
+            genre = genre,
+            description = description
+            )
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_clean, "pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, append = TRUE, col.names = FALSE)
