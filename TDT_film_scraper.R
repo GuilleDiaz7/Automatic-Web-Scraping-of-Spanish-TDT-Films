@@ -51,7 +51,7 @@ df_clean <- df %>%
   filter(sp_title != "Cine" & genre != "Cine") %>% 
   mutate(date = ymd(substr(date, 1, 8)),
          ) %>%
-  filter(date = Sys.Date() ) %>%
+  filter(date == Sys.Date() ) %>%
   transmute(date_time = ymd_hm(paste(date, time)),
             channel = channel,
             sp_title = sp_title, 
