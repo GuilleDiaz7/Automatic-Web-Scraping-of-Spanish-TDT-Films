@@ -89,7 +89,7 @@ joined_tibble <- left_join(
   df_clean, results_by_film_url, by = c("url" = "url")
 )
 
-df_clean <- joined_tibble %>% 
+df_final <- joined_tibble %>% 
   relocate(
     year, .before = genre
   ) %>% 
@@ -102,7 +102,7 @@ df_clean <- joined_tibble %>%
 
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
-write.table(df_clean, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
 
 
   
