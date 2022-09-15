@@ -5,7 +5,6 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(lubridate)
-library(ggplot2)
 
 
 #### LOAD URL AND SCRAPE THE WEBSITE ####
