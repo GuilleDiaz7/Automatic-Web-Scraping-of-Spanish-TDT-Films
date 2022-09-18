@@ -82,12 +82,26 @@ results_by_film_url <- tibble(url = nav_results_list$url,
                                      ~ .x %>%
                                        html_nodes("tr:nth-child(4) .ficha-txt-descripcion") %>%
                                        html_text2()
-                                     )
+                                     ),
+                          country = map(nav_results_list$html_result,
+                                      ~ .x %>%
+                                        html_nodes("tr:nth-child(3) .ficha-txt-descripcion") %>%
+                                        html_text2()
+                          ),
+                          length = map(nav_results_list$html_result,
+                                      ~ .x %>%
+                                        html_nodes("tr:nth-child(5) .ficha-txt-descripcion") %>%
+                                        html_text2()
+                                      )    
                           )
 
 joined_tibble <- left_join(
   df_clean, results_by_film_url, by = c("url" = "url")
 )
+
+df_clean <- df_clean %>% 
+  mutate(country = unlist(country),
+         length = unlist(length))
 
 df_final <- joined_tibble %>% 
   relocate(
