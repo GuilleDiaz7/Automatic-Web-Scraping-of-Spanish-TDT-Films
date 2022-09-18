@@ -50,7 +50,7 @@ df <- as.data.frame(cbind(date, time, channel, sp_title, genre, url, description
 df_clean <- df %>% 
   filter(sp_title != "Cine" & genre != "Cine") %>% 
   mutate(date = ymd(substr(date, 1, 8)),
-         ) %>%
+  ) %>%
   filter(date == Sys.Date() ) %>%
   transmute(date_time = ymd_hm(paste(date, time)),
             channel = channel,
@@ -58,7 +58,7 @@ df_clean <- df %>%
             genre = genre,
             url = url,
             description = description
-            )
+  )
 
 
 #### Perform the second part of the scraping ####
@@ -70,38 +70,45 @@ nav_results_list <- tibble(
                         read_html()
                     }),
   url = df_clean$url
-  )
+)
 
 results_by_film_url <- tibble(url = nav_results_list$url,
-                          original_title = map(nav_results_list$html_result,
-                                               ~ .x %>%
-                                                 html_nodes("tr:nth-child(2) .ficha-txt-descripcion") %>%
-                                                 html_text2()
-                                               ),
-                          year = map(nav_results_list$html_result,
-                                     ~ .x %>%
-                                       html_nodes("tr:nth-child(4) .ficha-txt-descripcion") %>%
-                                       html_text2()
-                                     ),
-                          country = map(nav_results_list$html_result,
-                                      ~ .x %>%
-                                        html_nodes("tr:nth-child(3) .ficha-txt-descripcion") %>%
-                                        html_text2()
-                          ),
-                          length = map(nav_results_list$html_result,
-                                      ~ .x %>%
-                                        html_nodes("tr:nth-child(5) .ficha-txt-descripcion") %>%
-                                        html_text2()
-                                      )    
-                          )
+                              original_title = map(nav_results_list$html_result,
+                                                   ~ .x %>%
+                                                     html_nodes("tr:nth-child(2) .ficha-txt-descripcion") %>%
+                                                     html_text2()
+                              ),
+                              year = map(nav_results_list$html_result,
+                                         ~ .x %>%
+                                           html_nodes("tr:nth-child(4) .ficha-txt-descripcion") %>%
+                                           html_text2()
+                              ),
+                              country = map(nav_results_list$html_result,
+                                            ~ .x %>%
+                                              html_nodes("tr:nth-child(3) .ficha-txt-descripcion") %>%
+                                              html_text2()
+                              ),
+                              length = map(nav_results_list$html_result,
+                                           ~ .x %>%
+                                             html_nodes("tr:nth-child(5) .ficha-txt-descripcion") %>%
+                                             html_text2()
+                              )    
+)
 
 joined_tibble <- left_join(
   df_clean, results_by_film_url, by = c("url" = "url")
 )
 
-df_clean <- df_clean %>% 
+
+joined_tibble <- joined_tibble %>% 
   mutate(country = unlist(country),
          length = unlist(length))
+
+joined_tibble <- joined_tibble %>%
+  mutate(across(3:9, ~ifelse(.=="", NA, as.character(.))))
+joined_tibble$year <- as.integer(joined_tibble$year)
+joined_tibble <- joined_tibble %>% 
+  relocate(c("country", "length", "year"), .before = description)
 
 df_final <- joined_tibble %>% 
   relocate(
@@ -113,7 +120,6 @@ df_final <- joined_tibble %>%
   select(-url) %>% 
   mutate(original_title = as.character(original_title),
          year = as.numeric(year))
-
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
