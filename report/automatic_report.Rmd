@@ -3,17 +3,19 @@ title: "Spanish TDT movies report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
   html_document:
     toc: true
     toc_float: true
     toc_align: "left"
     toc_depth: 2
     theme: "yeti"
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
 lang: "es-ES"
 ---
+
+# INTRODUCTION
 
 [Link](https://github.com/GuilleDiaz7)
 
@@ -28,7 +30,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Basic data
+# LOAD AND CLEAN DATA
 
 ```{r Load and prepare data}
 #| warning = FALSE,
@@ -57,7 +59,7 @@ df_no_desc <- df %>%
   select(1:8)
 
 df_no_desc %>% 
-  head() %>% 
+  head(6) %>% 
   knitr::kable()
 ```
 
@@ -110,17 +112,73 @@ df %>% map_dbl(
 So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These are the ones:
 
 ```{r}
-data %>% 
-  group_by(sp_title) %>% 
+df_clean %>% 
+  group_by(`Spanish title`) %>% 
   summarise(emisiones = n()) %>% 
   filter(emisiones > 1)
 
 ```
 
-IT WOULD BE REALLY NICE TO HAVE A MAP OF THE DISTRIBUTION OF FILM COUNTRIES.
+# MAPPING THE DATA
 
+First, we have to prepare the data. Country names are in spanish, let's translate them.
 
+```{r}
+df_map <- df_clean %>% 
+  group_by(`Country`) %>% 
+  summarise(Movies = n())
 
+df_map <- df_map %>% 
+  mutate(
+    Country = case_when(
+      Country == "Alemania" ~ "Germany",
+      Country == "Canadá" ~ "Canada",
+      Country == "España" ~ "Spain",
+      Country == "Estados Unidos" ~ "United States",
+      Country == "Italia" ~ "Italy",
+      Country == "Reino Unido" ~ "England"
+    )
+  )
+df_map
+```
+Then, we plot a map
+
+```{r}
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+
+world <- ne_countries(scale = "small", returnclass = "sf")
+
+world %>% 
+  ggplot() + 
+  geom_sf() +
+  geom_hline(yintercept = 0, linetype = "dashed") 
+
+```
+The latter was an empty world map. We are goint to fill it with our data. We create a suitable data frame.
+
+```{r}
+world <- world %>% 
+  dplyr::rename("Country" = "sovereignt")
+
+prueba <- left_join(world, df_map)
+
+```
+
+Let's see how it looks filled.
+
+```{r}
+library(ggplot2)
+library(sf)
+prueba %>% 
+  ggplot() +
+  geom_sf(aes(fill = Movies)) +
+  theme_void() +
+  theme(legend.position = "top") +
+  labs(fill = "Number of movies:") +
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+```
 
 
 
