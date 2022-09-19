@@ -115,7 +115,7 @@ So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp
 ```{r}
 df_clean %>% 
   group_by(`Spanish title`) %>% 
-  summarise(emisiones = n()) %>% 
+  summarise(Emisiones = n()) %>% 
   filter(emisiones > 1) %>% 
   knitr::kable()
 
