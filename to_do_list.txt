@@ -1,0 +1,5 @@
+1. Stats about film length:
+    1. Mean, median, sd, etc.
+    2. Boxplots by: channel, genre, weekday.
+    
+2.
