@@ -1,0 +1,133 @@
+---
+title: "Empezando con RMarkdown"
+author: "Guillermo Diaz"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    theme: "yeti"
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+lang: "es-ES"
+---
+
+# Título de primer nivel
+
+## Título de segundo nivel
+
+### Títutlo de tercer nivel
+
+*Texto en cursiva*
+
+**Texto en negrita**
+
+***Texto en cursiva y negrita***
+
+[Link](https://github.com/GuilleDiaz7)
+
+![Logo de los Cines Van Golem](figures/van_golem_logo.jpg)
+
+La ecuación sería $e = mc^2$
+
+```{r setup}
+#| include = FALSE
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Con `results = 'hold'` lo que hacemos es sacar todos los resultados del tirón, sin partir el cuadro de código cada vez que hay un resultado que mostrar[^1].
+
+[^1]: Me marco un pie de página absolutamente escandaloso.
+
+```{r}
+#| results = 'hold'
+data(iris)
+a <- 1+1
+print(a)
+head(iris)
+```
+
+Note that the **echo = FALSE** parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+#| echo = FALSE
+plot(iris$Sepal.Length, iris$Sepal.Width)
+
+```
+
+```{r}
+#| eval = FALSE
+plot(iris$Sepal.Length, iris$Sepal.Width)
+```
+
+```{r}
+#| warning = FALSE
+data("HairEyeColor")
+chisq.test(HairEyeColor[, , 2])
+```
+
+```{r}
+#| message = FALSE,
+#| warning = FALSE
+library(vcd)
+
+```
+
+¡Cuidado con el nombre de las variables!
+
+```{r}
+#| error = TRUE,
+#| eval = FALSE
+library(ggplot2)
+data(iris)
+
+ggplot(iris, aes(Sepal.Width, Sepal.Legth)) +
+  geom_point()
+```
+
+------------------------------------------------------------------------
+
+# Real Stuff with TDT data
+
+```{r}
+#| warnings = FALSE
+df <- read.csv("https://raw.githubusercontent.com/GuilleDiaz7/Automatic-Web-Scraping-of-Spanish-TDT-Films/main/data/pelis_tv_hoy.csv",
+               fileEncoding = "UTF-8")
+library(tidyr)
+df_clean <- df %>% 
+  drop_na()
+library(dplyr)
+head(
+  df_clean %>% select(
+  1:8
+  )
+)
+
+```
+
+Para crear *listas*:
+
+-   Un elemento
+-   Otro elemento
+    -   Otro elemento más
+
+1.  Elemento 1
+2.  Elemento 2
+3.  Elemento 3
+
+# Create tables the handy way
+
+```{r penguins_table}
+#| eval = FALSE,
+#| warning = FALSE
+library(palmerpenguins)
+penguins %>% 
+  head() %>% 
+  knitr::kable()
+```
+
+# Para escribir una cita en bloque
+
+> Cara antigua. Es **code block** en la opción *Format* del Editor Visual.
