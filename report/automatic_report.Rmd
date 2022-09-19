@@ -3,15 +3,15 @@ title: "Spanish TDT movies report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
   html_document:
     toc: true
     toc_float: true
     toc_align: "left"
     toc_depth: 2
     theme: "yeti"
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 lang: "es-ES"
 ---
 
