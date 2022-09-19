@@ -1,43 +1,133 @@
 ---
-title: "Empezando con RMarkdown"
+title: "Spanish TDT movies report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    toc: true
-    toc_float: true
-    toc_depth: 2
-    theme: "yeti"
   pdf_document:
     toc: yes
     toc_depth: '2'
+  html_document:
+    toc: true
+    toc_float: true
+    toc_align: "left"
+    toc_depth: 2
+    theme: "yeti"
 lang: "es-ES"
 ---
 
-# Título de primer nivel
-
-## Título de segundo nivel
-
-### Títutlo de tercer nivel
-
-*Texto en cursiva*
-
-**Texto en negrita**
-
-***Texto en cursiva y negrita***
-
 [Link](https://github.com/GuilleDiaz7)
 
-![Logo de los Cines Van Golem](figures/van_golem_logo.jpg)
-
-La ecuación sería $e = mc^2$
+This line of code is quite magical. Change any opts_chunk here and it will change the entire document. You can set any option you want: `echo`, `include`, `warning` or `messages`.
 
 ```{r setup}
-#| include = FALSE
-knitr::opts_chunk$set(echo = TRUE)
+#| include = TRUE
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
+# Basic data
+
+```{r Load and prepare data}
+#| warning = FALSE,
+#| include = FALSE,
+#| messages = FALSE
+library(dplyr)
+library(tidyr)
+
+
+data <- read.csv("https://raw.githubusercontent.com/GuilleDiaz7/Automatic-Web-Scraping-of-Spanish-TDT-Films/main/data/pelis_tv_hoy.csv", fileEncoding = 'UTF-8')
+
+df <- data %>% mutate(
+  genre = replace(genre, genre == "Suspense / Thriller", "Suspense"),
+  genre = replace(genre, genre == "Documentales", "Documental"),
+  genre = replace(genre, genre == "Ciencia ficci?n", "SyFy"),
+  genre = replace(genre, genre == "Infantil/Familiar", "Infantil")
+)
+```
+
+The data set contains `r nrow(df)` instances and `r ncol(df)` variables. From now on, we won't be using the variable `Description`, which included a brief synopsis of each film. Let's see a few examples of the data.
+
+```{r}
+#| warning = FALSE
+library(knitr)
+df_no_desc <- df %>% 
+  select(1:8)
+
+df_no_desc %>% 
+  head() %>% 
+  knitr::kable()
+```
+
+The variables names are formatted to work with them in R, not to be shown in a document. We can clean them.
+
+
+```{r}
+df_clean <- df_no_desc %>% 
+  dplyr::rename(
+    Date = date_time,
+    Channel = channel,
+    "Spanish title" = sp_title,
+    "Original title" = original_title,
+    Year = year,
+    Genre = genre,
+    Country = country,
+    Length = length
+  )
+
+df_clean %>% 
+  head() %>% 
+  knitr::kable()
+```
+
+This is so much better. I want to see some examples with `Country` and `Length` data.
+
+```{r}
+df_clean %>% 
+  drop_na() %>%
+  head() %>% 
+  knitr::kable()
+```
+
+I don't like to see the unit in the `Length` column. I noticed to that film genres are in spanish. Let's clean both columns.
+
+```{r}
+
+```
+
+
+¿How many unique values there are in each variable?
+
+```{r distinct values}
+library(purrr)
+df %>% map_dbl(
+  n_distinct
+)
+```
+
+So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These are the ones:
+
+```{r}
+data %>% 
+  group_by(sp_title) %>% 
+  summarise(emisiones = n()) %>% 
+  filter(emisiones > 1)
+
+```
+
+IT WOULD BE REALLY NICE TO HAVE A MAP OF THE DISTRIBUTION OF FILM COUNTRIES.
+
+
+
+
+
+
 Con `results = 'hold'` lo que hacemos es sacar todos los resultados del tirón, sin partir el cuadro de código cada vez que hay un resultado que mostrar[^1].
+
+
+
 
 [^1]: Me marco un pie de página absolutamente escandaloso.
 
