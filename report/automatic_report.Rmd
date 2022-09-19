@@ -3,23 +3,23 @@ title: "Spanish TDT movies report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
   html_document:
     toc: true
     toc_float: true
     toc_align: "left"
     toc_depth: 2
     theme: "yeti"
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 lang: "es-ES"
 ---
 
-# INTRODUCTION
+# Introduction
 
-[Link](https://github.com/GuilleDiaz7)
+[GitHub](https://github.com/GuilleDiaz7)
 
-This line of code is quite magical. Change any opts_chunk here and it will change the entire document. You can set any option you want: `echo`, `include`, `warning` or `messages`.
+This line of code is quite magical. Change any `opts_chunk` here and it will change setting for the entire document. You can set any option you want: `echo`, `include`, `warning` or `messages`.
 
 ```{r setup}
 #| include = TRUE
@@ -30,7 +30,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-# LOAD AND CLEAN DATA
+\newpage
+# Load and clean data
 
 ```{r Load and prepare data}
 #| warning = FALSE,
@@ -115,13 +116,19 @@ So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp
 df_clean %>% 
   group_by(`Spanish title`) %>% 
   summarise(emisiones = n()) %>% 
-  filter(emisiones > 1)
+  filter(emisiones > 1) %>% 
+  knitr::kable()
 
 ```
-
-# MAPPING THE DATA
+\newpage
+# Mapping the data
 
 First, we have to prepare the data. Country names are in spanish, let's translate them.
+
+```{r}
+unique(df_clean$Country)
+```
+
 
 ```{r}
 df_map <- df_clean %>% 
@@ -134,12 +141,16 @@ df_map <- df_map %>%
       Country == "Alemania" ~ "Germany",
       Country == "Canadá" ~ "Canada",
       Country == "España" ~ "Spain",
-      Country == "Estados Unidos" ~ "United States",
+      Country == "Estados Unidos" ~ "United States of America",
       Country == "Italia" ~ "Italy",
-      Country == "Reino Unido" ~ "England"
+      Country == "Reino Unido" ~ "United Kingdom",
+      Country == "COrea del Sur" ~ "South Korea",
+      is.na(Country) == TRUE ~ "Sin datos"
     )
   )
+
 df_map
+is.na(df_map)
 ```
 Then, we plot a map
 
@@ -162,7 +173,7 @@ The latter was an empty world map. We are goint to fill it with our data. We cre
 world <- world %>% 
   dplyr::rename("Country" = "sovereignt")
 
-prueba <- left_join(world, df_map)
+df_world <- left_join(world, df_map)
 
 ```
 
@@ -171,7 +182,7 @@ Let's see how it looks filled.
 ```{r}
 library(ggplot2)
 library(sf)
-prueba %>% 
+df_world %>% 
   ggplot() +
   geom_sf(aes(fill = Movies)) +
   theme_void() +
@@ -179,103 +190,3 @@ prueba %>%
   labs(fill = "Number of movies:") +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE))
 ```
-
-
-
-Con `results = 'hold'` lo que hacemos es sacar todos los resultados del tirón, sin partir el cuadro de código cada vez que hay un resultado que mostrar[^1].
-
-
-
-
-[^1]: Me marco un pie de página absolutamente escandaloso.
-
-```{r}
-#| results = 'hold'
-data(iris)
-a <- 1+1
-print(a)
-head(iris)
-```
-
-Note that the **echo = FALSE** parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-```{r}
-#| echo = FALSE
-plot(iris$Sepal.Length, iris$Sepal.Width)
-
-```
-
-```{r}
-#| eval = FALSE
-plot(iris$Sepal.Length, iris$Sepal.Width)
-```
-
-```{r}
-#| warning = FALSE
-data("HairEyeColor")
-chisq.test(HairEyeColor[, , 2])
-```
-
-```{r}
-#| message = FALSE,
-#| warning = FALSE
-library(vcd)
-
-```
-
-¡Cuidado con el nombre de las variables!
-
-```{r}
-#| error = TRUE,
-#| eval = FALSE
-library(ggplot2)
-data(iris)
-
-ggplot(iris, aes(Sepal.Width, Sepal.Legth)) +
-  geom_point()
-```
-
-------------------------------------------------------------------------
-
-# Real Stuff with TDT data
-
-```{r}
-#| warnings = FALSE
-df <- read.csv("https://raw.githubusercontent.com/GuilleDiaz7/Automatic-Web-Scraping-of-Spanish-TDT-Films/main/data/pelis_tv_hoy.csv",
-               fileEncoding = "UTF-8")
-library(tidyr)
-df_clean <- df %>% 
-  drop_na()
-library(dplyr)
-head(
-  df_clean %>% select(
-  1:8
-  )
-)
-
-```
-
-Para crear *listas*:
-
--   Un elemento
--   Otro elemento
-    -   Otro elemento más
-
-1.  Elemento 1
-2.  Elemento 2
-3.  Elemento 3
-
-# Create tables the handy way
-
-```{r penguins_table}
-#| eval = FALSE,
-#| warning = FALSE
-library(palmerpenguins)
-penguins %>% 
-  head() %>% 
-  knitr::kable()
-```
-
-# Para escribir una cita en bloque
-
-> Cara antigua. Es **code block** en la opción *Format* del Editor Visual.
