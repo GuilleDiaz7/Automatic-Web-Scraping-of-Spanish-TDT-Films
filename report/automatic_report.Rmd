@@ -15,6 +15,12 @@ output:
 lang: "es-ES"
 ---
 
+
+```{r}
+#| echo = FALSE
+options(knitr.table.format = "html") 
+```
+
 # Introduction
 
 [GitHub](https://github.com/GuilleDiaz7)
@@ -56,12 +62,14 @@ The data set contains `r nrow(df)` instances and `r ncol(df)` variables. From no
 ```{r}
 #| warning = FALSE
 library(knitr)
+library(kableExtra)
 df_no_desc <- df %>% 
   select(1:8)
 
 df_no_desc %>% 
-  head(6) %>% 
-  knitr::kable()
+  head(3) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
 The variables names are formatted to work with them in R, not to be shown in a document. We can clean them.
@@ -80,10 +88,13 @@ df_clean <- df_no_desc %>%
     Length = length
   )
 
+# Hay varios temas predeterminados en kableExtra, como kable_paper()
 df_clean %>% 
-  head() %>% 
-  knitr::kable()
+  head(3) %>% 
+  knitr::kable() %>%
+  kable_paper()
 ```
+
 
 This is so much better. I want to see some examples with `Country` and `Length` data.
 
@@ -94,21 +105,25 @@ df_clean %>%
   knitr::kable()
 ```
 
+
 I don't like to see the unit in the `Length` column. I also noticed to that film genres are in Spanish. Let's clean the length.
 
 ```{r}
 #| error = FALSE
 library(readr)
-df_clean$Length <- parse_number(df_clean$Length)
+df_clean$Length <- as.integer(parse_number(df_clean$Length))
 
 ```
 
 
 ```{r}
+
 df_clean %>% 
   drop_na() %>% 
-  head() %>% 
+  head(4) %>%
   knitr::kable()
+
+  
 ```
 How long are the films show in TV?
 
