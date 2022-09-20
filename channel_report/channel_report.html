@@ -594,10 +594,14 @@ pre code {
 </div>
 
 
-<div id="updated-20-septiembre-2022" class="section level1">
-<h1>Updated: 20 septiembre 2022</h1>
-<div id="analysis-of-la-1" class="section level2">
-<h2>Analysis of La 1</h2>
+<div id="updated-20-septiembre-2022" class="section level4">
+<h4>Updated: 20 septiembre 2022</h4>
+</div>
+<div id="analysis-of-la-1" class="section level4">
+<h4>Analysis of La 1</h4>
+</div>
+<div id="load-and-clean-data" class="section level1">
+<h1>Load and clean data</h1>
 <p>This is an automatic report which goal is to show the differences in
 film programming between Spanish public TV channels.</p>
 <pre class="r"><code>data &lt;- data %&gt;% 
@@ -771,10 +775,10 @@ Tessa Hennig - Elli gibt den Löffel ab
 Drama
 </td>
 <td style="text-align:left;">
-NA
+Alemania
 </td>
 <td style="text-align:right;">
-NA
+90
 </td>
 </tr>
 <tr>
@@ -909,7 +913,19 @@ NA
 </tr>
 </tbody>
 </table>
+<div id="duplicates" class="section level3">
+<h3>Duplicates</h3>
+<p>If you don’t see anything that means that there are
+<code>{r} dups</code> duplicates.</p>
+<pre class="r"><code>dups &lt;- data %&gt;% 
+  group_by(`Spanish title`) %&gt;% 
+  summarise(emisiones = n()) %&gt;% 
+  filter(emisiones &gt; 1)</code></pre>
 </div>
+</div>
+<div id="plot-data" class="section level1">
+<h1>Plot data</h1>
+<pre class="r"><code>library(ggplot2)</code></pre>
 </div>
 
 

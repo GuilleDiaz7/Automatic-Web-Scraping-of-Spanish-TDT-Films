@@ -17,9 +17,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Updated: `r params$date`
-## Analysis of `r params$my_channel`
+#### Updated: `r params$date`
+#### Analysis of `r params$my_channel`
 
+# Load and clean data
 This is an automatic report which goal is to show the differences in film programming between Spanish public TV channels.
 
 ```{r Load TDT data}
@@ -79,5 +80,43 @@ data %>%
   head(6) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+```
+### Duplicates
+
+```{r}
+dups <- data %>% 
+  group_by(`Spanish title`) %>% 
+  summarise(emisiones = n()) %>% 
+  filter(emisiones > 1)
+```
+
+
+# Plot data
+
+```{r}
+library(ggplot2)
+
+genre_count_img <- data %>% 
+  group_by(Genre) %>% 
+  summarise(Count = n()) %>% 
+  ggplot(aes(x = reorder(Genre, (-Count)), y = Count)) +
+  geom_bar(stat = 'identity', col = "darkblue", fill = "darkblue") +
+  theme_classic() + 
+  coord_flip() +
+  xlab("") +
+  ylab("")
+genre_count_img
+```
+
+```{r}
+boxplot_channel_years <- data %>% 
+  select(Channel, Genre, Year) %>% 
+  ggplot(aes(x = Genre, y = Year)) +
+  geom_boxplot() +
+  theme_classic() +
+  coord_flip() +
+  xlab("") +
+  ylab("")
+boxplot_channel_years
 ```
 
