@@ -94,10 +94,33 @@ df_clean %>%
   knitr::kable()
 ```
 
-I don't like to see the unit in the `Length` column. I noticed to that film genres are in spanish. Let's clean both columns.
+I don't like to see the unit in the `Length` column. I also noticed to that film genres are in Spanish. Let's clean the length.
 
 ```{r}
+#| error = FALSE
+library(readr)
+df_clean$Length <- parse_number(df_clean$Length)
 
+```
+
+
+```{r}
+df_clean %>% 
+  drop_na() %>% 
+  head() %>% 
+  knitr::kable()
+```
+How long are the films show in TV?
+
+```{r}
+library(ggplot2)
+df_clean %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Length)) +
+    geom_histogram(aes(y=..density..), binwidth = 1) +
+    geom_density(alpha = 0.2, fill = "#FF6666") +
+    theme_classic()
+  
 ```
 
 
@@ -116,14 +139,15 @@ So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp
 df_clean %>% 
   group_by(`Spanish title`) %>% 
   summarise(Emisiones = n()) %>% 
-  filter(emisiones > 1) %>% 
+  filter(Emisiones > 1) %>% 
+  arrange(desc(Emisiones)) %>% 
   knitr::kable()
 
 ```
 \newpage
 # Mapping the data
 
-First, we have to prepare the data. Country names are in spanish, let's translate them.
+First, we have to prepare the data. Country names are in Spanish, let's translate them.
 
 ```{r}
 unique(df_clean$Country)
@@ -144,18 +168,17 @@ df_map <- df_map %>%
       Country == "Estados Unidos" ~ "United States of America",
       Country == "Italia" ~ "Italy",
       Country == "Reino Unido" ~ "United Kingdom",
-      Country == "COrea del Sur" ~ "South Korea",
+      Country == "Corea del Sur" ~ "South Korea",
+      Country == "Francia" ~ "France",
       is.na(Country) == TRUE ~ "Sin datos"
     )
   )
 
 df_map
-is.na(df_map)
 ```
 Then, we plot a map
 
 ```{r}
-library(ggplot2)
 library(sf)
 library(rnaturalearth)
 
@@ -190,3 +213,4 @@ df_world %>%
   labs(fill = "Number of movies:") +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE))
 ```
+
