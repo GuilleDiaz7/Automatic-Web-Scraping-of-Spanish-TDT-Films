@@ -121,5 +121,7 @@ df_final <- joined_tibble %>%
   mutate(original_title = as.character(original_title),
          year = as.numeric(year))
 
+#### BeMad films ####
+
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
