@@ -1,0 +1,83 @@
+---
+title: "Channel report"
+author: "Guillermo Diaz"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  my_channel: "La 1"
+  date: !r format(Sys.Date(), "%d %B %Y")
+---
+
+```{r setup}
+#| include = FALSE
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Updated: `r params$date`
+## Analysis of `r params$my_channel`
+
+This is an automatic report which goal is to show the differences in film programming between Spanish public TV channels.
+
+```{r Load TDT data}
+#| include = FALSE
+library(dplyr)
+library(readr)
+data <- read.csv("https://raw.githubusercontent.com/GuilleDiaz7/Automatic-Web-Scraping-of-Spanish-TDT-Films/main/data/pelis_tv_hoy.csv", fileEncoding = 'UTF-8')
+```
+
+```{r Clean the TDT data}
+data <- data %>% 
+  select(1:8) %>% 
+  mutate(
+  genre = replace(genre, genre == "Suspense / Thriller", "Suspense"),
+  genre = replace(genre, genre == "Documentales", "Documental"),
+  genre = replace(genre, genre == "Ciencia ficci?n", "SyFy"),
+  genre = replace(genre, genre == "Infantil/Familiar", "Infantil")
+  ) %>% 
+  dplyr::rename(
+        Date = date_time,
+    Channel = channel,
+    "Spanish title" = sp_title,
+    "Original title" = original_title,
+    Year = year,
+    Genre = genre,
+    Country = country,
+    Length = length
+  ) %>% 
+  mutate(
+    Length = as.integer(parse_number(Length))
+  )
+```
+
+How does the tidy data looks?
+
+```{r}
+library(kableExtra)
+
+data %>% 
+  head(2) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+```
+
+
+``` {r}
+data <- data %>% 
+  filter(Channel == params$my_channel) 
+```
+
+Now that we have chosen the channel to show using `params` in the YAML code, we can analyse `r params$my_channel` data. Let's first see a few instances.
+
+```{r}
+
+
+data %>% 
+  head(6) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+```
+
