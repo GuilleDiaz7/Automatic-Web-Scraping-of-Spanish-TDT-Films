@@ -200,7 +200,7 @@ library(sf)
 library(rnaturalearth)
 
 world <- ne_countries(scale = "small", returnclass = "sf")
-
+world
 world %>% 
   ggplot() + 
   geom_sf() +
