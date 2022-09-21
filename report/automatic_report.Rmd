@@ -109,7 +109,7 @@ df_clean %>%
 I don't like to see the unit in the `Length` column. I also noticed to that film genres are in Spanish. Let's clean the length.
 
 ```{r}
-#| error = FALSE
+#| error = FALSE,
 #| eval = FALSE
 library(readr)
 # df_clean$Length <- as.integer(parse_number(df_clean$Length))
@@ -161,6 +161,30 @@ df_clean %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 
 ```
+# By date
+
+```{r}
+library(lubridate)
+daily_data <- df_clean %>% 
+  group_by(Date = as.Date(Date)) %>% 
+  summarise(Films = n())
+
+daily_data %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F)
+```
+
+
+
+```{r}
+daily_data %>%  
+  ggplot(aes(x = Date, y = Films)) +
+  geom_line() +
+  theme_classic()
+
+```
+
+
 \newpage
 # Mapping the data
 
