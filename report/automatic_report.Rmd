@@ -179,12 +179,14 @@ df_map <- df_map %>%
     Country = case_when(
       Country == "Alemania" ~ "Germany",
       Country == "Canadá" ~ "Canada",
+      Country == "Dinamarca" ~ "Denmark",
       Country == "España" ~ "Spain",
       Country == "Estados Unidos" ~ "United States of America",
       Country == "Italia" ~ "Italy",
       Country == "Reino Unido" ~ "United Kingdom",
       Country == "Corea del Sur" ~ "South Korea",
       Country == "Francia" ~ "France",
+      Country == "Sudáfrica" ~ "South Africa",
       is.na(Country) == TRUE ~ "Sin datos"
     )
   )
