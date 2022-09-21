@@ -77,7 +77,7 @@ results_by_film_url <- results_by_film_url %>%
   pivot_wider(names_from = casillas, values_from = datos) %>% 
   select(c(1, 3:13))
 
-df_final <- left_join(df_clean, results_by_film_url, bu = c("url", "url")) %>% 
+df_final <- left_join(df_clean, results_by_film_url, by = c("url", "url")) %>% 
   select(-url) %>% 
   mutate(`Año:` = as.integer(`Año:`),
          `Duración:` = as.integer(parse_number(`Duración:`))) %>% 
@@ -181,7 +181,7 @@ results_by_film_url <- results_by_film_url %>%
   pivot_wider(names_from = casillas, values_from = datos) %>% 
   select(c(1, 3:13))
 
-df_final <- left_join(df_clean, results_by_film_url, bu = c("url", "url")) %>% 
+df_final <- left_join(df_clean, results_by_film_url, by = c("url", "url")) %>% 
   select(-url) %>% 
   mutate(`Año:` = as.integer(`Año:`),
          `Duración:` = as.integer(parse_number(`Duración:`))) %>% 
