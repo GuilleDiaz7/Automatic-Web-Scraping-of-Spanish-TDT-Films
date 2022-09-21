@@ -110,8 +110,9 @@ I don't like to see the unit in the `Length` column. I also noticed to that film
 
 ```{r}
 #| error = FALSE
+#| eval = FALSE
 library(readr)
-df_clean$Length <- as.integer(parse_number(df_clean$Length))
+# df_clean$Length <- as.integer(parse_number(df_clean$Length))
 
 ```
 
@@ -186,16 +187,27 @@ df_map <- df_map %>%
       Country == "Estados Unidos" ~ "United States of America",
       Country == "Italia" ~ "Italy",
       Country == "Reino Unido" ~ "United Kingdom",
+      Country == "Tailandia" ~ "Tailand",
       Country == "Corea del Sur" ~ "South Korea",
       Country == "Francia" ~ "France",
       Country == "Sudáfrica" ~ "South Africa",
+      Country == "Suecia" ~ "Sweden",
       is.na(Country) == TRUE ~ "Sin datos"
     )
   )
 
 df_map
 ```
-Then, we plot a map
+First, we plot a bar plot.
+
+```{r}
+df_map %>% 
+  ggplot(aes(x = Country, y = Movies))+
+    geom_bar(stat = 'identity')
+```
+
+
+Then, we plot a map.
 
 ```{r}
 library(sf)

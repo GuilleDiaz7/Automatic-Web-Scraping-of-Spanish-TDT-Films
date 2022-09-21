@@ -36,7 +36,7 @@ data <- data %>%
   mutate(
   genre = replace(genre, genre == "Suspense / Thriller", "Suspense"),
   genre = replace(genre, genre == "Documentales", "Documental"),
-  genre = replace(genre, genre == "Ciencia ficci?n", "SyFy"),
+  genre = replace(genre, genre == "Ciencia ficción", "SyFy"),
   genre = replace(genre, genre == "Infantil/Familiar", "Infantil")
   ) %>% 
   dplyr::rename(
@@ -48,10 +48,11 @@ data <- data %>%
     Genre = genre,
     Country = country,
     Length = length
-  ) %>% 
-  mutate(
-    Length = as.integer(parse_number(Length))
   )
+#%>% 
+#  mutate(
+#    Length = as.integer(parse_number(Length))
+#  )
 ```
 
 How does the tidy data looks?
@@ -60,7 +61,7 @@ How does the tidy data looks?
 library(kableExtra)
 
 data %>% 
-  head(2) %>% 
+  head(4) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
