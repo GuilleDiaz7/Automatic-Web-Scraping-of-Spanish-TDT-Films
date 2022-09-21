@@ -156,7 +156,8 @@ df_clean %>%
   summarise(Emisiones = n()) %>% 
   filter(Emisiones > 1) %>% 
   arrange(desc(Emisiones)) %>% 
-  knitr::kable(full_width = TRUE)
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 
 ```
 \newpage
@@ -178,6 +179,7 @@ df_map <- df_map %>%
   mutate(
     Country = case_when(
       Country == "Alemania" ~ "Germany",
+      Country == "Australia" ~ "Australia",
       Country == "Canadá" ~ "Canada",
       Country == "Dinamarca" ~ "Denmark",
       Country == "España" ~ "Spain",
@@ -200,7 +202,7 @@ library(sf)
 library(rnaturalearth)
 
 world <- ne_countries(scale = "small", returnclass = "sf")
-world
+
 world %>% 
   ggplot() + 
   geom_sf() +
