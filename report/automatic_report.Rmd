@@ -156,7 +156,7 @@ df_clean %>%
   summarise(Emisiones = n()) %>% 
   filter(Emisiones > 1) %>% 
   arrange(desc(Emisiones)) %>% 
-  knitr::kable()
+  knitr::kable(full_width = TRUE)
 
 ```
 \newpage
