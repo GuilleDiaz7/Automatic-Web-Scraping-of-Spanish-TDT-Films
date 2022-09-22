@@ -112,20 +112,38 @@ df_clean %>%
   
 ```
 
-Let's tranform lenght in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes.
+Let's transform length in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes.
 
 ```{r}
-df_clean %>% 
+df_clean <- df_clean %>% 
   mutate(
     length_category = case_when(
       Length <= 90 ~ "Less than 90 minutes",
       Length > 90 & Length <= 150 ~ "Between 90 y 150 minutes",
-      Length > 150 ~ "More than 150 minutes"
+      Length > 150 ~ "More than 150 minutes",
+      TRUE ~ "Rest"
     )
-  ) %>% 
+  )
+
+df_clean %>%  
   ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
   geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
   theme_classic()
+```
+```{r}
+df_clean %>% 
+  group_by(Channel, length_category) %>% 
+  summarise(Count = n()) %>% 
+  ggplot(aes(x = length_category, y = Count)) +
+  geom_bar(stat = 'identity') +
+  facet_wrap(~ Channel)
+```
+
+```{r}
+%>% 
+  ggplot(x = length_category, y = Count) +
+  geom_bar(stat = 'identity') +
+  facet_wrap(~ channel)
 ```
 
 
