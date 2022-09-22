@@ -119,7 +119,7 @@ df_clean <- df_clean %>%
   mutate(
     length_category = case_when(
       Length <= 90 ~ "Less than 90 minutes",
-      Length > 90 & Length <= 150 ~ "Between 90 y 150 minutes",
+      Length > 90 & Length <= 150 ~ "Between 90 and 150 minutes",
       Length > 150 ~ "More than 150 minutes",
       TRUE ~ "Rest"
     )
@@ -136,6 +136,8 @@ df_clean %>%
 
 ```{r}
 df_clean %>% 
+  mutate(length_category = factor(length_category, levels = c("Less than 90 minutes", 
+                                                      "Between 90 and 150 minutes", "More than 150 minutes"))) %>% 
   group_by(Channel, length_category) %>% 
   summarise(Count = n()) %>% 
   ggplot(aes(x = length_category, y = Count, fill = length_category)) +
@@ -143,6 +145,8 @@ df_clean %>%
   facet_wrap(~ Channel) +
   theme_classic() +
   theme(axis.text.x = element_blank())
+
+```
 
 ```
 
