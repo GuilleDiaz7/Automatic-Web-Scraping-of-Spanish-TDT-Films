@@ -132,6 +132,14 @@ df_clean %>%
 
 ```
 
+Why Antena 3 and La 1 broadcast the shortest film. Let's have a glimpse.
+
+```{r}
+df_clean %>% 
+  filter(Channel == "Antena 3" | Channel == "La 1") %>% 
+  select(c("Date", "Channel", "Spanish title", "Length")) %>% 
+  arrange(Length)
+```
 
 
 ```{r}
