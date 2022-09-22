@@ -1,6 +1,6 @@
 
 # Hourly scraping
-name: spanishTDTscraper
+name: spanishTDTscrape
 
 # Controls when the action will run.
 on:
