@@ -5,6 +5,7 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(lubridate)
+library(readr)
 
 
 #### LOAD URL AND SCRAPE THE WEBSITE ####
