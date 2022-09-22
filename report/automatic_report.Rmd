@@ -129,22 +129,26 @@ df_clean %>%
   ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
   geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
   theme_classic()
+
 ```
+
+
+
 ```{r}
 df_clean %>% 
   group_by(Channel, length_category) %>% 
   summarise(Count = n()) %>% 
-  ggplot(aes(x = length_category, y = Count)) +
+  ggplot(aes(x = length_category, y = Count, fill = length_category)) +
   geom_bar(stat = 'identity') +
-  facet_wrap(~ Channel)
+  facet_wrap(~ Channel) +
+  theme_classic() +
+  theme(axis.text.x = element_blank())
+
 ```
 
-```{r}
-%>% 
-  ggplot(x = length_category, y = Count) +
-  geom_bar(stat = 'identity') +
-  facet_wrap(~ channel)
-```
+
+
+
 
 
 ¿How many unique values there are in each variable?
