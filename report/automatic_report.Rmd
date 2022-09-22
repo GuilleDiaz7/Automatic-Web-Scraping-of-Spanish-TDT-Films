@@ -63,8 +63,11 @@ The data set contains `r nrow(df)` instances and `r ncol(df)` variables. From no
 #| warning = FALSE
 library(knitr)
 library(kableExtra)
+library(lubridate)
+
 df_no_desc <- df %>% 
-  select(1:8)
+  select(1:8) %>% 
+  mutate(date_time = as_datetime(date_time))
 
 df_no_desc %>% 
   head(3) %>% 
@@ -90,53 +93,39 @@ df_clean <- df_no_desc %>%
 
 # Hay varios temas predeterminados en kableExtra, como kable_paper()
 df_clean %>% 
-  head(3) %>% 
-  knitr::kable() %>%
-  kable_paper()
+  head(3) %>%
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
+# The first questions
 
-
-This is so much better. I want to see some examples with `Country` and `Length` data.
-
-```{r}
-df_clean %>% 
-  drop_na() %>%
-  head() %>% 
-  knitr::kable()
-```
-
-
-I don't like to see the unit in the `Length` column. I also noticed to that film genres are in Spanish. Let's clean the length.
-
-```{r}
-#| error = FALSE,
-#| eval = FALSE
-library(readr)
-# df_clean$Length <- as.integer(parse_number(df_clean$Length))
-
-```
-
-
-```{r}
-
-df_clean %>% 
-  drop_na() %>% 
-  head(4) %>%
-  knitr::kable()
-
-  
-```
-How long are the films show in TV?
+How long are the films shown in TV?
 
 ```{r}
 library(ggplot2)
 df_clean %>% 
   drop_na() %>% 
   ggplot(aes(x = Length)) +
-    geom_histogram(aes(y=..density..), binwidth = 1) +
+    geom_histogram(aes(y=..density..), binwidth = 5) +
     geom_density(alpha = 0.2, fill = "#FF6666") +
     theme_classic()
   
+```
+
+Let's tranform lenght in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes.
+
+```{r}
+df_clean %>% 
+  mutate(
+    length_category = case_when(
+      Length <= 90 ~ "Less than 90 minutes",
+      Length > 90 & Length <= 150 ~ "Between 90 y 150 minutes",
+      Length > 150 ~ "More than 150 minutes"
+    )
+  ) %>% 
+  ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
+  geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
+  theme_classic()
 ```
 
 
@@ -163,20 +152,35 @@ df_clean %>%
 ```
 # By date
 
-```{r}
-library(lubridate)
-daily_data <- df_clean %>% 
-  group_by(Date = as.Date(Date)) %>% 
-  summarise(Films = n())
 
-daily_data %>% 
+```{r}
+library(stringr)
+library(kableExtra)
+library(lubridate)
+
+df_clean %>% 
+  mutate("Weekday" = weekdays.Date(Date, abbreviate = F)) %>% 
+  relocate("Weekday", .after = Date) %>% 
+  transmute(
+    Date = Date,
+    "Weekday" = case_when(
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("lunes|martes|miercoles|jueves", ignore_case = T)) ~ "Laboral",
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("viernes|sabado|domingo", ignore_case = T)) ~ "Finde"
+      )
+    ) %>% 
+  group_by(
+    Date = as.Date(Date), Weekday) %>% 
+  summarise(Films = n()) %>% 
   knitr::kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+
 ```
 
 
 
+
 ```{r}
+#| eval = FALSE
 daily_data %>%  
   ggplot(aes(x = Date, y = Films)) +
   geom_line() +
