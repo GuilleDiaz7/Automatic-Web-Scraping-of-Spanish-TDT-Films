@@ -4,6 +4,7 @@ author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
 output:
   html_document:
+    code_folding: hide
     toc: true
     toc_float: true
     toc_align: "left"
@@ -57,10 +58,11 @@ df <- data %>% mutate(
 )
 ```
 
-The data set contains `r nrow(df)` instances and `r ncol(df)` variables. From now on, we won't be using the variable `Description`, which included a brief synopsis of each film. Let's see a few examples of the data.
+The data set contains `r nrow(df)` instances and `r ncol(df)` variables. From now on, we won't be using the variable `Description` and a bunch more related to the creators of the film (directors, writers, actors, etc).
 
 ```{r}
-#| warning = FALSE
+#| warning = FALSE,
+#| include = FALSE
 library(knitr)
 library(kableExtra)
 library(lubridate)
@@ -69,16 +71,6 @@ df_no_desc <- df %>%
   select(1:8) %>% 
   mutate(date_time = as_datetime(date_time))
 
-df_no_desc %>% 
-  head(3) %>% 
-  knitr::kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
-```
-
-The variables names are formatted to work with them in R, not to be shown in a document. We can clean them.
-
-
-```{r}
 df_clean <- df_no_desc %>% 
   dplyr::rename(
     Date = date_time,
@@ -90,81 +82,46 @@ df_clean <- df_no_desc %>%
     Country = country,
     Length = length
   )
+```
 
+Let's see a few examples of the data
+
+
+```{r}
 # Hay varios temas predeterminados en kableExtra, como kable_paper()
 df_clean %>% 
-  head(3) %>%
+  head(6) %>%
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
-# The first questions
 
-How long are the films shown in TV?
+# Some basic facts about the dataset
+
+## How many films have been shown in each channel?
 
 ```{r}
 library(ggplot2)
+
 df_clean %>% 
-  drop_na() %>% 
-  ggplot(aes(x = Length)) +
-    geom_histogram(aes(y=..density..), binwidth = 5) +
-    geom_density(alpha = 0.2, fill = "#FF6666") +
-    theme_classic()
+  group_by(Channel) %>% 
+  summarise(`Film count` = n()) %>%
+  ggplot(aes(x = `Film count`, y = reorder(Channel, `Film count`))) +
+  geom_bar(stat = 'identity') +
+  theme_classic()
   
 ```
 
-Let's transform length in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes.
 
-```{r}
-df_clean <- df_clean %>% 
-  mutate(
-    length_category = case_when(
-      Length <= 90 ~ "Less than 90 minutes",
-      Length > 90 & Length <= 150 ~ "Between 90 and 150 minutes",
-      Length > 150 ~ "More than 150 minutes",
-      TRUE ~ "Rest"
-    )
-  )
+## How many unique values there are in each variable?
 
-df_clean %>%  
-  ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
-  geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
-  theme_classic()
-
-```
-
-Why Antena 3 and La 1 broadcast the shortest films. Let's have a glimpse.
-
-```{r}
-df_clean %>% 
-  filter(Channel == "Antena 3" | Channel == "La 1") %>% 
-  select(c("Date", "Channel", "Spanish title", "Length")) %>% 
-  arrange(Length) %>%
+```{r distinct values}
+library(purrr)
+df_clean %>% map_dbl(
+  n_distinct) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-```{r}
-df_clean %>% 
-  mutate(length_category = factor(length_category, levels = c("Less than 90 minutes", 
-                                                      "Between 90 and 150 minutes", "More than 150 minutes"))) %>% 
-  group_by(Channel, length_category) %>% 
-  summarise(Count = n()) %>% 
-  ggplot(aes(x = length_category, y = Count, fill = length_category)) +
-  geom_bar(stat = 'identity') +
-  facet_wrap(~ Channel) +
-  theme_classic() +
-  theme(axis.text.x = element_blank())
-
-```
-
-¿How many unique values there are in each variable?
-
-```{r distinct values}
-library(purrr)
-df %>% map_dbl(
-  n_distinct
-)
-```
 
 So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These are the ones:
 
@@ -178,6 +135,161 @@ df_clean %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 
 ```
+
+
+The discrepancy between `Spanish title` (`r count(unique(df_clean["Spanish title"])) `) and `Original title` (`r count(unique(df_clean["Original title"])) `) count is striking. There must be one more duplicated value in the latter.
+
+```{r}
+df_clean %>% 
+  group_by(`Original title`) %>% 
+  distinct() %>% 
+  filter(n()>1) %>% 
+  arrange(`Original title`) %>% 
+  select(3:4) %>% 
+  distinct(`Spanish title`) %>% 
+  mutate(Count = n()) %>% 
+  filter(Count >= 2) %>% 
+  select(-Count) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+  
+```  
+
+
+As you can see, two different films share the same `Original title`. If this happens more times from now on, we will now. The list of every film shown more than once is the following. Take in account that is hides two films with the same length.
+
+
+# Film length
+
+## How long are the films shown in TV?
+
+This is the distribution of film length. The mean is `r round(mean(df_clean$Length), 0)` and the median `r round(median(df_clean$Length), 0)`.
+
+```{r}
+library(ggplot2)
+df_clean %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Length)) +
+    geom_histogram(aes(y=..density..), binwidth = 5) +
+    geom_density(alpha = 0.2, fill = "#FF6666") +
+    theme_classic()
+  
+```
+
+
+Let's see how it is by channel.
+
+```{r}
+df_clean %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Length)) +
+    geom_histogram(aes(y=..density..), binwidth = 5) +
+    geom_density(alpha = 0.2, fill = "#FF6666") +
+    facet_wrap(~ Channel) +
+    theme_classic() 
+```
+
+A boxplot may be easier to interpret. It is remarkable how similar are lengths in Antena 3 channel. We will be looking at it and La 1 and laSexta too. They are the channels with the smallest median film length.
+
+```{r}
+df_clean %>%  
+  ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
+  geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
+  theme_classic()
+```
+
+
+Why Antena 3 and La 1 (and laSexta) broadcast the shortest films. Let's have a glimpse.
+
+```{r}
+library(stringr)
+library(kableExtra)
+library(lubridate)
+
+df_clean %>% 
+  mutate("Weekday" = weekdays.Date(Date, abbreviate = F)) %>% 
+  relocate("Weekday", .after = Date) %>% 
+  transmute(
+    Date = Date,
+    Channel = Channel,
+    `Spanish title` = `Spanish title`,
+    "Weekday" = case_when(
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("lunes|martes|miercoles|jueves", ignore_case = T)) ~ "Laboral",
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("viernes|sabado|domingo", ignore_case = T)) ~ "Finde"
+      ),
+    Length = Length
+    ) %>% 
+  filter(Channel == "Antena 3" | Channel == "La 1" | Channel == "laSexta") %>% 
+  arrange(Length) %>%
+  head(15) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+```
+
+
+It is obvious how short are these films, and how all of them are broadcast during the afternoon, starting between 16 p.m. and 19 p.m. Most of these films are shown on weekends (remember, including Fridays).
+
+
+Now we transform `Length`  in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes. We make a boxplot, ordered by the median.
+
+```{r}
+df_clean <- df_clean %>% 
+  mutate(
+    length_category = case_when(
+      Length <= 90 ~ "Less than 90 minutes",
+      Length > 90 & Length <= 150 ~ "Between 90 and 150 minutes",
+      Length > 150 ~ "More than 150 minutes",
+      TRUE ~ "Rest"
+    )
+  )
+```
+
+
+#### Not color-blind graphic
+
+```{r}
+perc_data <- df_clean %>% 
+    mutate(length_category = factor(length_category, levels = c("Less than 90 minutes", 
+                                                      "Between 90 and 150 minutes", "More than 150 minutes"))) %>% 
+  group_by(Channel) %>% 
+  mutate(Channel_shown = n()) %>% 
+  group_by(Channel, length_category) %>% 
+  summarise(perc = n()/max(Channel_shown))
+
+library(scales) # For percent
+
+perc_data %>% 
+  ggplot(aes(x = length_category, y = perc, fill = length_category)) +
+  geom_bar(stat = 'identity', show.legend = "none") +
+  facet_wrap(~ Channel) +
+  geom_text(aes(label = percent(perc)), vjust = -0.2, size = 2.3) +
+  theme_classic() +
+  theme(axis.text.x = element_blank())
+```
+
+#### Color-blind graphic
+
+```{r}
+library(ggtext)
+library(thematic)
+# Color-blind safe colors
+coloritos <- thematic::okabe_ito(3)
+```
+
+
+```{r}
+perc_data %>% 
+  ggplot(aes(x = length_category, y = perc, fill = length_category)) +
+  geom_bar(stat = 'identity', show.legend = "none") +
+  scale_fill_manual(values = coloritos) +
+  facet_wrap(~ Channel) +
+  geom_text(aes(label = percent(perc)), vjust = -0.2, size = 2.3) +
+  theme_classic() +
+  theme(axis.text.x = element_blank())
+```
+
+
+
 # By date
 
 
@@ -201,18 +313,6 @@ df_clean %>%
   summarise(Films = n()) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
-
-```
-
-
-
-
-```{r}
-#| eval = FALSE
-daily_data %>%  
-  ggplot(aes(x = Date, y = Films)) +
-  geom_line() +
-  theme_classic()
 
 ```
 
