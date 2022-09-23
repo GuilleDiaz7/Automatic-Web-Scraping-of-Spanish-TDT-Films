@@ -142,8 +142,6 @@ df_clean %>%
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
-```
-
 
 ```{r}
 df_clean %>% 
@@ -158,13 +156,6 @@ df_clean %>%
   theme(axis.text.x = element_blank())
 
 ```
-
-```
-
-
-
-
-
 
 ¿How many unique values there are in each variable?
 
