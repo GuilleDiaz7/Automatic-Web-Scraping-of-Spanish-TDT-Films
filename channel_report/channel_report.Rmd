@@ -2,7 +2,14 @@
 title: "Channel report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+      code_folding: hide
+      toc: true
+      toc_float: true
+      toc_align: "left"
+      toc_depth: 3
+      theme: "united"
 params:
   my_channel: "La 1"
   date: !r format(Sys.Date(), "%d %B %Y")
@@ -20,13 +27,15 @@ knitr::opts_chunk$set(
 #### Updated: `r params$date`
 #### Analysis of `r params$my_channel`
 
-# Load and clean data
-This is an automatic report which goal is to show the differences in film programming between Spanish public TV channels.
+
 
 ```{r Load TDT data}
 #| include = FALSE
 library(dplyr)
 library(readr)
+library(lubridate)
+library(stringr)
+
 data <- read.csv("https://raw.githubusercontent.com/GuilleDiaz7/Automatic-Web-Scraping-of-Spanish-TDT-Films/main/data/pelis_tv_hoy.csv", fileEncoding = 'UTF-8')
 ```
 
@@ -37,7 +46,8 @@ data <- data %>%
   genre = replace(genre, genre == "Suspense / Thriller", "Suspense"),
   genre = replace(genre, genre == "Documentales", "Documental"),
   genre = replace(genre, genre == "Ciencia ficción", "SyFy"),
-  genre = replace(genre, genre == "Infantil/Familiar", "Infantil")
+  genre = replace(genre, genre == "Infantil/Familiar", "Infantil"),
+  date_time = as_datetime(date_time)
   ) %>% 
   dplyr::rename(
         Date = date_time,
@@ -49,75 +59,55 @@ data <- data %>%
     Country = country,
     Length = length
   )
-#%>% 
-#  mutate(
-#    Length = as.integer(parse_number(Length))
-#  )
 ```
 
-How does the tidy data looks?
+# `r params$my_channel` channel report
+
+
+```{r Add weekday}
+
+
+
+df <- data %>% 
+  mutate("Weekday" = weekdays.Date(Date, abbreviate = F)) %>% 
+  relocate("Weekday", .after = Date) %>% 
+  transmute(
+    Date = Date,
+    "Weekday" = case_when(
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("lunes|martes|miercoles|jueves", ignore_case = T)) ~ "Laboral",
+      str_detect(iconv(Weekday, to='ASCII//TRANSLIT'), regex("viernes|sabado|domingo", ignore_case = T)) ~ "Finde"
+      ),
+    Channel = Channel,
+    `Spanish title` = `Spanish title`,
+    Length = Length,
+    Year = Year,
+    Genre = Genre,
+    Country = Country
+  )
+```
+
+## When are films broadcasted in `r params$my_channel`?
+
 
 ```{r}
-library(kableExtra)
-
-data %>% 
-  head(4) %>% 
-  knitr::kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
+#| include = FALSE
+df %>%
+  group_by(Date = as.Date(Date), Channel) %>% 
+  summarise(Movies = n())
 ```
 
-
-``` {r}
-data <- data %>% 
-  filter(Channel == params$my_channel) 
-```
-
-Now that we have chosen the channel to show using `params` in the YAML code, we can analyse `r params$my_channel` data. Let's first see a few instances.
 
 ```{r}
+library(gghighlight)
 
-
-data %>% 
-  head(6) %>% 
-  knitr::kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
-```
-### Duplicates
-
-```{r}
-dups <- data %>% 
-  group_by(`Spanish title`) %>% 
-  summarise(emisiones = n()) %>% 
-  filter(emisiones > 1)
+df %>% 
+  group_by(Date = as.Date(Date), Channel) %>% 
+  summarise(Movies = n()) %>% 
+  ggplot(aes(x = Date, y = Movies,  col = Channel)) +
+  geom_line() +
+  gghighlight(Channel == params$my_channel) + 
+  theme_classic()
+  
 ```
 
-
-# Plot data
-
-```{r}
-library(ggplot2)
-
-genre_count_img <- data %>% 
-  group_by(Genre) %>% 
-  summarise(Count = n()) %>% 
-  ggplot(aes(x = reorder(Genre, (-Count)), y = Count)) +
-  geom_bar(stat = 'identity', col = "darkblue", fill = "darkblue") +
-  theme_classic() + 
-  coord_flip() +
-  xlab("") +
-  ylab("")
-genre_count_img
-```
-
-```{r}
-boxplot_channel_years <- data %>% 
-  select(Channel, Genre, Year) %>% 
-  ggplot(aes(x = Genre, y = Year)) +
-  geom_boxplot() +
-  theme_classic() +
-  coord_flip() +
-  xlab("") +
-  ylab("")
-boxplot_channel_years
-```
 

@@ -9,13 +9,12 @@ output:
     toc_float: true
     toc_align: "left"
     toc_depth: 2
-    theme: "yeti"
+    theme: "united"
   pdf_document:
     toc: yes
     toc_depth: '2'
 lang: "es-ES"
 ---
-
 
 ```{r}
 #| echo = FALSE
@@ -38,6 +37,7 @@ knitr::opts_chunk$set(
 ```
 
 \newpage
+
 # Load and clean data
 
 ```{r Load and prepare data}
@@ -86,7 +86,6 @@ df_clean <- df_no_desc %>%
 
 Let's see a few examples of the data
 
-
 ```{r}
 # Hay varios temas predeterminados en kableExtra, como kable_paper()
 df_clean %>% 
@@ -111,7 +110,6 @@ df_clean %>%
   
 ```
 
-
 ## How many unique values there are in each variable?
 
 ```{r distinct values}
@@ -121,7 +119,6 @@ df_clean %>% map_dbl(
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
-
 
 So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These are the ones:
 
@@ -136,8 +133,7 @@ df_clean %>%
 
 ```
 
-
-The discrepancy between `Spanish title` (`r count(unique(df_clean["Spanish title"])) `) and `Original title` (`r count(unique(df_clean["Original title"])) `) count is striking. There must be one more duplicated value in the latter.
+The discrepancy between `Spanish title` (`r count(unique(df_clean["Spanish title"]))`) and `Original title` (`r count(unique(df_clean["Original title"]))`) count is striking. There must be one more duplicated value in the latter.
 
 ```{r}
 df_clean %>% 
@@ -153,11 +149,9 @@ df_clean %>%
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
   
-```  
-
+```
 
 As you can see, two different films share the same `Original title`. If this happens more times from now on, we will now. The list of every film shown more than once is the following. Take in account that is hides two films with the same length.
-
 
 # Film length
 
@@ -176,7 +170,6 @@ df_clean %>%
   
 ```
 
-
 Let's see how it is by channel.
 
 ```{r}
@@ -193,13 +186,25 @@ A boxplot may be easier to interpret. It is remarkable how similar are lengths i
 
 ```{r}
 df_clean %>%  
-  ggplot(aes(x = Length, y = reorder(Channel, Length, median), color = Channel, fill = Channel)) +
+  ggplot(aes(x = Length, y = reorder(Channel, Length, median),
+             color = Channel, fill = Channel)) +
   geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
   theme_classic()
 ```
 
+```{r four_shortest}
+four_shortest <- df_clean %>% 
+  group_by(Channel) %>% 
+  summarise(Median = median(Length)) %>% 
+  arrange(Median) %>% 
+  slice_head(n = 4) %>% 
+  select(-Median) %>% 
+  as.list() %>% 
+  unname() %>%
+  unlist()
+```
 
-Why Antena 3 and La 1 (and laSexta) broadcast the shortest films. Let's have a glimpse.
+Why are `r glue::glue(four_shortest[1], ", ", four_shortest[2], ", ", four_shortest[3], " and ", four_shortest[4])` broadcasting the shortest films? Let's have a glimpse.
 
 ```{r}
 library(stringr)
@@ -219,18 +224,16 @@ df_clean %>%
       ),
     Length = Length
     ) %>% 
-  filter(Channel == "Antena 3" | Channel == "La 1" | Channel == "laSexta") %>% 
+  filter(Channel == four_shortest) %>% 
   arrange(Length) %>%
   head(15) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-
 It is obvious how short are these films, and how all of them are broadcast during the afternoon, starting between 16 p.m. and 19 p.m. Most of these films are shown on weekends (remember, including Fridays).
 
-
-Now we transform `Length`  in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes. We make a boxplot, ordered by the median.
+Now we transform `Length` in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes. We make a boxplot, ordered by the median.
 
 ```{r}
 df_clean <- df_clean %>% 
@@ -243,7 +246,6 @@ df_clean <- df_clean %>%
     )
   )
 ```
-
 
 #### Not color-blind graphic
 
@@ -276,7 +278,6 @@ library(thematic)
 coloritos <- thematic::okabe_ito(3)
 ```
 
-
 ```{r}
 perc_data %>% 
   ggplot(aes(x = length_category, y = perc, fill = length_category)) +
@@ -288,10 +289,7 @@ perc_data %>%
   theme(axis.text.x = element_blank())
 ```
 
-
-
 # By date
-
 
 ```{r}
 library(stringr)
@@ -316,8 +314,8 @@ df_clean %>%
 
 ```
 
-
 \newpage
+
 # Mapping the data
 
 First, we have to prepare the data. Country names are in Spanish, let's translate them.
@@ -325,7 +323,6 @@ First, we have to prepare the data. Country names are in Spanish, let's translat
 ```{r}
 unique(df_clean$Country)
 ```
-
 
 ```{r}
 df_map <- df_clean %>% 
@@ -338,30 +335,37 @@ df_map <- df_map %>%
       Country == "Alemania" ~ "Germany",
       Country == "Australia" ~ "Australia",
       Country == "Canadá" ~ "Canada",
+      Country == "China" ~ "China",
+      Country == "Corea del Sur" ~ "South Korea",
       Country == "Dinamarca" ~ "Denmark",
       Country == "España" ~ "Spain",
       Country == "Estados Unidos" ~ "United States of America",
+      Country == "Francia" ~ "France",
       Country == "Italia" ~ "Italy",
       Country == "Reino Unido" ~ "United Kingdom",
-      Country == "Tailandia" ~ "Tailand",
-      Country == "Corea del Sur" ~ "South Korea",
-      Country == "Francia" ~ "France",
+      Country == "Rusia" ~ "Russia",
       Country == "Sudáfrica" ~ "South Africa",
       Country == "Suecia" ~ "Sweden",
+      Country == "Tailandia" ~ "Tailand",
       is.na(Country) == TRUE ~ "Sin datos"
     )
   )
 
-df_map
+df_map %>% 
+  arrange(desc(Movies)) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
+
 First, we plot a bar plot.
 
 ```{r}
 df_map %>% 
-  ggplot(aes(x = Country, y = Movies))+
-    geom_bar(stat = 'identity')
+  ggplot(aes(x = reorder(Country, Movies), y = Movies)) +
+  geom_bar(stat = 'identity') +
+  coord_flip() +
+  theme_classic()
 ```
-
 
 Then, we plot a map.
 
@@ -377,6 +381,7 @@ world %>%
   geom_hline(yintercept = 0, linetype = "dashed") 
 
 ```
+
 The latter was an empty world map. We are goint to fill it with our data. We create a suitable data frame.
 
 ```{r}
@@ -400,4 +405,3 @@ df_world %>%
   labs(fill = "Number of movies:") +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE))
 ```
-
