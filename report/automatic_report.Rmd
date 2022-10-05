@@ -106,7 +106,8 @@ df_clean %>%
   summarise(`Film count` = n()) %>%
   ggplot(aes(x = `Film count`, y = reorder(Channel, `Film count`))) +
   geom_bar(stat = 'identity') +
-  theme_classic()
+  theme_classic() +
+  ylab("Channel")
   
 ```
 
@@ -120,14 +121,16 @@ df_clean %>% map_dbl(
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These are the ones:
+So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These is the top 10 (I filtered a couple of instances that are not films, but regular TV programs):
 
 ```{r}
 df_clean %>% 
+  filter(`Spanish title` != "Mejor llama a Kiko" & `Spanish title` != "El zapping de Surferos") %>% 
   group_by(`Spanish title`) %>% 
   summarise(Emisiones = n()) %>% 
   filter(Emisiones > 1) %>% 
   arrange(desc(Emisiones)) %>% 
+  head(10) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 
@@ -151,7 +154,7 @@ df_clean %>%
   
 ```
 
-As you can see, two different films share the same `Original title`. If this happens more times from now on, we will now. The list of every film shown more than once is the following. Take in account that is hides two films with the same length.
+As you can see, some different films share the same `Original title`. If this happens more times from now on, we will now. Above is the list of every film shown more than once.
 
 # Film length
 
@@ -182,7 +185,7 @@ df_clean %>%
     theme_classic() 
 ```
 
-A boxplot may be easier to interpret. It is remarkable how similar are lengths in Antena 3 channel. We will be looking at it and La 1 and laSexta too. They are the channels with the smallest median film length.
+A boxplot may be easier to interpret. It is remarkable how similar are lengths in Antena 3 channel.
 
 ```{r}
 df_clean %>%  
@@ -231,9 +234,9 @@ df_clean %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-It is obvious how short are these films, and how all of them are broadcast during the afternoon, starting between 16 p.m. and 19 p.m. Most of these films are shown on weekends (remember, including Fridays).
+It is obvious how short are these films; most of them are broadcasted during the afternoon, starting between 16 p.m. and 19 p.m. Most of these films are also shown on weekends (remember, including Fridays).
 
-Now we transform `Length` in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes. We make a boxplot, ordered by the median.
+Now we transform `Length` in three categories being (1) less than 90 minutes, (2) between 90 and 150 minutes and (3) more than 150 minutes.
 
 ```{r}
 df_clean <- df_clean %>% 
@@ -291,12 +294,13 @@ perc_data %>%
 
 # By date
 
+This is a list of the number of films shown each day.
 ```{r}
 library(stringr)
 library(kableExtra)
 library(lubridate)
 
-df_clean %>% 
+df_clean_film_day <- df_clean %>% 
   mutate("Weekday" = weekdays.Date(Date, abbreviate = F)) %>% 
   relocate("Weekday", .after = Date) %>% 
   transmute(
@@ -308,11 +312,22 @@ df_clean %>%
     ) %>% 
   group_by(
     Date = as.Date(Date), Weekday) %>% 
-  summarise(Films = n()) %>% 
+  summarise(Films = n()) 
+  
+
+df_clean_film_day %>% 
+  head(10) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
-
 ```
+
+```{r}
+df_clean_film_day %>% 
+  ggplot(aes(x = Date, y = Films, fill = Weekday)) +
+  geom_col() +
+  theme_classic()
+```
+
 
 \newpage
 
@@ -341,7 +356,10 @@ df_map <- df_map %>%
       Country == "España" ~ "Spain",
       Country == "Estados Unidos" ~ "United States of America",
       Country == "Francia" ~ "France",
+      Country == "Hong Kong" ~ "Hong Kong",
+      Country == "Islandia" ~ "Island",
       Country == "Italia" ~ "Italy",
+      Country == "Noruega" ~ "Norway",
       Country == "Reino Unido" ~ "United Kingdom",
       Country == "Rusia" ~ "Russia",
       Country == "Sudáfrica" ~ "South Africa",
@@ -357,7 +375,7 @@ df_map %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-First, we plot a bar plot.
+First, let's use a bar plot. Mmm, we do seem to like USA films...
 
 ```{r}
 df_map %>% 

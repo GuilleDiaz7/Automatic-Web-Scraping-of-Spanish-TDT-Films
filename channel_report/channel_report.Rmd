@@ -2,16 +2,19 @@
 title: "Channel report"
 author: "Guillermo Diaz"
 date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
-      code_folding: hide
-      toc: true
-      toc_float: true
-      toc_align: "left"
-      toc_depth: 3
-      theme: "united"
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+    toc_align: left
+    toc_depth: 3
+    theme: united
 params:
-  my_channel: "La 1"
+  my_channel: La 1
   date: !r format(Sys.Date(), "%d %B %Y")
 ---
 
@@ -106,7 +109,9 @@ df %>%
   ggplot(aes(x = Date, y = Movies,  col = Channel)) +
   geom_line() +
   gghighlight(Channel == params$my_channel) + 
-  theme_classic()
+  theme_classic() +
+  scale_y_log10()
+
   
 ```
 
