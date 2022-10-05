@@ -331,7 +331,7 @@ df_clean_film_day %>%
 
 \newpage
 
-# Mapping the data
+# Mapping the data (or analyzing the country variable)
 
 First, we have to prepare the data. Country names are in Spanish, let's translate them.
 
@@ -348,6 +348,7 @@ df_map <- df_map %>%
   mutate(
     Country = case_when(
       Country == "Alemania" ~ "Germany",
+      Country == "Argentina" ~ "Argentina",
       Country == "Australia" ~ "Australia",
       Country == "Canadá" ~ "Canada",
       Country == "China" ~ "China",
@@ -361,6 +362,7 @@ df_map <- df_map %>%
       Country == "Italia" ~ "Italy",
       Country == "Noruega" ~ "Norway",
       Country == "Reino Unido" ~ "United Kingdom",
+      Country == "República Checa" ~ "Czech Republic",
       Country == "Rusia" ~ "Russia",
       Country == "Sudáfrica" ~ "South Africa",
       Country == "Suecia" ~ "Sweden",
@@ -423,3 +425,20 @@ df_world %>%
   labs(fill = "Number of movies:") +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE))
 ```
+
+
+I want to see the Country distribution by channel; for example, to analize which channel promote Spanish cinema. Or how the public channels behave.
+
+
+```{r}
+library(forcats)
+df_clean %>%
+  group_by(Channel, Country) %>% 
+  count(Country) %>% 
+  ggplot(aes(x = fct_lump(Country, prop = 0.05), y = n)) +
+  geom_col() +
+  facet_wrap(~Channel) +
+  coord_flip() +
+  theme_classic()
+```
+
