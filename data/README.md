@@ -1,4 +1,4 @@
-# Exploratory Data Analysis
+# The Dataset
 
 To load the dataset from this very same GitHub repo
 ```R
