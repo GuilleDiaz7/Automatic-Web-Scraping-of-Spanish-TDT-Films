@@ -26,5 +26,14 @@ There are 16 variables in the dataset:
 Data is completely available in the top 9 variables,  but there is quite a lot of missing data in the other variables.
 ```R
 df %>% 
-  summarise(across(everything(), ~sum(is.na(.))))
+  summarise(across(everything(), ~sum(is.na(.)))) %>% 
+  pivot_longer(everything()) %>% 
+  ggplot(aes(x = fct_reorder(name, value, sum), y = value)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic() +
+  ylab("Channel") +
+  xlab("Number of NAs")
 ```
+
+![plot_na](https://user-images.githubusercontent.com/42537388/194161826-598bf36a-4994-49f1-86ea-db33d6c50346.png)
