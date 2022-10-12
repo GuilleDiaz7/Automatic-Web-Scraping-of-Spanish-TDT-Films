@@ -73,9 +73,11 @@ results_by_film_url <- tibble(url = nav_results_list$url,
 )
 
 results_by_film_url <- results_by_film_url %>%
+  mutate(row = row_number()) %>% 
   unnest(c(casillas, datos)) %>% 
   mutate(datos = ifelse(datos == "", NA, datos)) %>% 
   pivot_wider(names_from = casillas, values_from = datos) %>% 
+  select(-row) %>%
   select(-c("SINOPSIS", "Título:"))
 
 df_final <- df_clean %>%
