@@ -409,7 +409,7 @@ df_map %>%
 
 Then, we plot a map.
 
-```{r}
+```{r, results='hide'}
 library(sf)
 library(rnaturalearth)
 
@@ -421,8 +421,6 @@ world %>%
   geom_hline(yintercept = 0, linetype = "dashed") 
 
 ```
-
-The latter was an empty world map. We are goint to fill it with our data. We create a suitable data frame.
 
 ```{r}
 world <- world %>% 
@@ -473,5 +471,46 @@ df_clean %>%
   facet_wrap(~Channel) +
   coord_flip() +
   theme_classic()
+```
+
+
+This we we can see better how Countries are distributed within each channel.
+
+
+```{r}
+perc_data_2 <- df_clean %>% 
+  group_by(Channel) %>% 
+  mutate(Channel_shown = n()) %>% 
+  group_by(Channel, Country, Channel_shown) %>% 
+  summarise(perc = n()/max(Channel_shown))
+
+perc_data_2 %>% 
+  ggplot(aes(x = fct_lump(Country, prop = 0.05), y = perc)) +
+  geom_col() +
+  facet_wrap(~Channel) +
+  coord_flip() +
+  theme_classic()
+
+
+```
+
+I want to do the same but removing films from United States.
+
+```{r}
+perc_data_3 <- df_clean %>% 
+  filter(Country != "Estados Unidos") %>% 
+  group_by(Channel) %>% 
+  mutate(Channel_shown = n()) %>% 
+  group_by(Channel, Country, Channel_shown) %>% 
+  summarise(perc = n()/max(Channel_shown))
+  
+  
+perc_data_3 %>%
+  ggplot(aes(x = fct_lump(Country, prop = 0.05), y = perc)) +
+  geom_col() +
+  facet_wrap(~Channel) +
+  coord_flip() +
+  theme_classic()
+  
 ```
 
