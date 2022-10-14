@@ -115,8 +115,7 @@ df_final <- df_clean %>%
   )
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
-# write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-write.table(df_final, "data/pelis_tv_hoy_.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
 
 
 #### LOAD URL AND SCRAPE THE WEBSITE ####
@@ -225,5 +224,4 @@ df_final <- df_clean %>%
     c("photography", "music", "producer", "production_company"), .before = actors
   )
 
-# write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-write.table(df_final, "data/pelis_tv_hoy_.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
