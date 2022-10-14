@@ -1,5 +1,0 @@
-1. Stats about film length:
-    1. Mean, median, sd, etc.
-    2. Boxplots by: channel, genre, weekday.
-    
-2. Predict some categorical variable (weekday: laboral o finde; channel: public, general, fachis, movies o whatever) following Albert Rapp logistic regression with tidymodels and titanic data tutorial.
