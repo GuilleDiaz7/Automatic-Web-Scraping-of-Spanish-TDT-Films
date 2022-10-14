@@ -121,7 +121,7 @@ df_clean %>% map_dbl(
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
-So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. These is the top 10 (I filtered a couple of instances that are not films, but regular TV programs):
+So, if there are `r nrow(df)` instances, why do we only have `r n_distinct(df$sp_title)` movies? I guess some of them were broadcasted more than once. This is the top 10 (I filtered a couple of instances that are not films, but regular TV programs):
 
 ```{r}
 df_clean %>% 
@@ -164,13 +164,13 @@ This is the distribution of film length. The mean is `r round(mean(df_clean$Leng
 
 ```{r}
 library(ggplot2)
-df_clean %>% 
-  drop_na() %>% 
+df_clean %>%
+  drop_na() %>%
   ggplot(aes(x = Length)) +
     geom_histogram(aes(y=..density..), binwidth = 5) +
     geom_density(alpha = 0.2, fill = "#FF6666") +
     theme_classic()
-  
+
 ```
 
 Let's see how it is by channel.
@@ -185,13 +185,13 @@ df_clean %>%
     theme_classic() 
 ```
 
-A boxplot may be easier to interpret. It is remarkable how similar are lengths in Antena 3 channel.
+A violin plot (a boxplot would be useful too) may be easier to interpret. It is remarkable how similar are lengths in Antena 3 channel.
 
 ```{r}
 df_clean %>%  
   ggplot(aes(x = Length, y = reorder(Channel, Length, median),
              color = Channel, fill = Channel)) +
-  geom_boxplot(size = 0.9, alpha = 0.2, show.legend = F) +
+  geom_violin(size = 0.9, alpha = 0.2, show.legend = F) +
   theme_classic()
 ```
 
@@ -321,6 +321,8 @@ df_clean_film_day %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T)
 ```
 
+There is a surprising spike on Wednesday 12th October which is not that surpring when I tell you that it is Spanish national day.
+
 ```{r}
 df_clean_film_day %>% 
   ggplot(aes(x = Date, y = Films, fill = Weekday)) +
@@ -339,6 +341,17 @@ First, we have to prepare the data. Country names are in Spanish, let's translat
 unique(df_clean$Country)
 ```
 
+
+I will check for empty values in the `Country` variable. If there isn't we will continue.
+
+```{r}
+df_clean %>% 
+  filter(Country == "")
+
+```
+
+
+
 ```{r}
 df_map <- df_clean %>% 
   group_by(`Country`) %>% 
@@ -348,8 +361,10 @@ df_map <- df_map %>%
   mutate(
     Country = case_when(
       Country == "Alemania" ~ "Germany",
+      Country == "Alemania del Oeste" ~ "Germany",
       Country == "Argentina" ~ "Argentina",
       Country == "Australia" ~ "Australia",
+      Country == "Bélgica" ~ "Belgium",
       Country == "Canadá" ~ "Canada",
       Country == "China" ~ "China",
       Country == "Corea del Sur" ~ "South Korea",
@@ -358,15 +373,20 @@ df_map <- df_map %>%
       Country == "Estados Unidos" ~ "United States of America",
       Country == "Francia" ~ "France",
       Country == "Hong Kong" ~ "Hong Kong",
+      Country == "Irlanda" ~ "Ireland", 
       Country == "Islandia" ~ "Island",
       Country == "Italia" ~ "Italy",
       Country == "Noruega" ~ "Norway",
+      Country == "Países Bajos" ~ "Netherlands",
       Country == "Reino Unido" ~ "United Kingdom",
       Country == "República Checa" ~ "Czech Republic",
       Country == "Rusia" ~ "Russia",
       Country == "Sudáfrica" ~ "South Africa",
       Country == "Suecia" ~ "Sweden",
       Country == "Tailandia" ~ "Tailand",
+      Country == "Taiwán" ~ "Taiwan",
+      Country == "Turquía" ~ "Turkey",
+      Country == "Ucrania" ~ "Ukraine",
       is.na(Country) == TRUE ~ "Sin datos"
     )
   )
@@ -418,6 +438,19 @@ Let's see how it looks filled.
 library(ggplot2)
 library(sf)
 df_world %>% 
+  ggplot() +
+  geom_sf(aes(fill = Movies)) +
+  theme_void() +
+  theme(legend.position = "top") +
+  labs(fill = "Number of movies:") +
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+```
+
+I will plot the same map but without United States (and maybe without Spain too). The scale is very confusing as it is.
+
+```{r}
+df_world %>% 
+  filter(Country != "United States of America" & Country != "Spain") %>% 
   ggplot() +
   geom_sf(aes(fill = Movies)) +
   theme_void() +
