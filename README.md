@@ -13,5 +13,9 @@ If you want to see a report based on this data just clink the [link](https://rpu
 
 ## Some useful resources
 
+1. Video tutorial: Automate Web Scraping with GitHub Actions: https://www.youtube.com/watch?v=N3NrWMxeeJQ
 
+2. Link to the repository used in the video tutorial: https://github.com/amrrs/scrape-automation
+
+3. Crontab guru: It provides the cron numnbers required to schedule the autoscrape: https://crontab.guru/
 
