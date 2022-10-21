@@ -114,10 +114,6 @@ df_final <- df_clean %>%
     c("photography", "music", "producer", "production_company"), .before = actors
   )
 
-df_final <- df_final %>% 
-  mutate(across(everything(), ~str_replace_all(., '"', "'")))
-
-
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
 
@@ -228,7 +224,5 @@ df_final <- df_clean %>%
     c("photography", "music", "producer", "production_company"), .before = actors
   )
 
-df_final <- df_final %>% 
-  mutate(across(everything(), ~str_replace_all(., '"', "'")))
 
 write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
