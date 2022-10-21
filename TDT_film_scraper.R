@@ -117,8 +117,6 @@ df_final <- df_clean %>%
 df_final <- df_final %>% 
   mutate(across(everything(), ~str_replace_all(., '"', "'")))
 
-write.table(df_final, "data/prueba.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = TRUE, append = FALSE)
-
 
 #### APPEND DATA DAY TO DAY TO A .CSV FILE ####
 write.table(df_final, "data/pelis_tv_hoy.csv", fileEncoding = "UTF-8", sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
